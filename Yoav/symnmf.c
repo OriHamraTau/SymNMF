@@ -325,7 +325,7 @@ static double **H_cords_to_dense(struct cord **H, int n, int k) {
     return Hmatrix;
 }
 
-void symnf_symnf(struct cord **H, struct vector *W) {
+void symnmf_symnmf(struct cord **H, struct vector *W) {
     int w_rows, w_cols, n, i, k;
     double **Wmatrix, **Hmatrix, **WH, **HHt, **HHtH;
 
