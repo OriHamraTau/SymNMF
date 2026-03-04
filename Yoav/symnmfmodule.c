@@ -13,7 +13,7 @@ static void free_cords_matrix(struct cord **matrix, int n) {
     free(matrix);
 }
 
-static struct vector * linkedlist_to_vectors(PyObject *py_vectors) {
+static struct vector *linkedList_to_vectors(PyObject *py_vectors) {
     int i, n = PyObject_Length(py_vectors);
     struct vector *head = NULL, *curr = NULL, *new_vec = NULL;
     PyObject* py_vec = NULL;
@@ -192,16 +192,18 @@ static PyObject *symnmf(PyObject *self, PyObject *args) {
 
     free_cords_matrix(Hmatrix, n);
     free_vectors(Wmatrix);
+
+    return res;
 }
 
-static PyObject *sym(PyObject self, PyObject *args) {
+static PyObject *sym(PyObject *self, PyObject *args) {
     PyObject *py_X_datapoints = NULL, *res = NULL;
     int n;
     struct cord **matrix = NULL;
     struct vector *X_datapoints = NULL;
 
     if (!PyArg_ParseTuple(args, "O", &py_X_datapoints)) {
-        return NULL
+        return NULL;
     }
     n = PyObject_Length(py_X_datapoints);
     if (n <= 0) {
@@ -228,14 +230,14 @@ static PyObject *sym(PyObject self, PyObject *args) {
     return res;
 }
 
-static PyObject *ddg(PyObject self, PyObject *args) {
+static PyObject *ddg(PyObject *self, PyObject *args) {
     PyObject *py_X_datapoints = NULL, *res = NULL;
     int n;
     struct cord **matrix = NULL;
     struct vector *X_datapoints = NULL;
 
     if (!PyArg_ParseTuple(args, "O", &py_X_datapoints)) {
-        return NULL
+        return NULL;
     }
     n = PyObject_Length(py_X_datapoints);
     if (n <= 0) {
@@ -262,14 +264,14 @@ static PyObject *ddg(PyObject self, PyObject *args) {
     return res;
 }
 
-static PyObject *norm(PyObject self, PyObject *args) {
+static PyObject *norm(PyObject *self, PyObject *args) {
     PyObject *py_X_datapoints = NULL, *res = NULL;
     int n;
     struct cord **matrix = NULL;
     struct vector *X_datapoints = NULL;
 
     if (!PyArg_ParseTuple(args, "O", &py_X_datapoints)) {
-        return NULL
+        return NULL;
     }
     n = PyObject_Length(py_X_datapoints);
     if (n <= 0) {
