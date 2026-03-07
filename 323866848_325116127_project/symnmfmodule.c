@@ -5,6 +5,17 @@
 #include <math.h>
 #include "symnmf.h"
 
+/**
+ * @file symnmfmodule.c
+ * @brief Python C-Extension module for the SymNMF algorithm.
+ * Handles the translation of data structures between Python (PyObjects) and C (Linked Lists/Matrices).
+ */
+
+/**
+ * @brief Frees an array of coordinate linked lists.
+ * * @param matrix Array of pointers to coordinate linked lists.
+ * @param n Number of rows in the matrix.
+ */
 static void free_cords_matrix(struct cord **matrix, int n) {
     int i;
     for (i = 0; i < n; i++) {
@@ -13,6 +24,11 @@ static void free_cords_matrix(struct cord **matrix, int n) {
     free(matrix);
 }
 
+/**
+ * @brief Converts a 1D Python list of floats into a C coordinate linked list.
+ * * @param py_list Python list representing a single vector.
+ * @return struct cord* Pointer to the head of the linked list, or NULL on error.
+ */
 static struct cord *list_to_vectors(PyObject *py_list) {
     int i, d = PyObject_Length(py_list);
     struct cord *head = NULL, *curr = NULL, *new_cord = NULL;
@@ -53,6 +69,11 @@ static struct cord *list_to_vectors(PyObject *py_list) {
     return head;
 }
 
+/**
+ * @brief Converts a 2D Python list of floats into a C linked list of vectors.
+ * * @param py_vectors Python list of lists representing multiple vectors.
+ * @return struct vector* Pointer to the head of the vector linked list, or NULL on error.
+ */
 static struct vector *linkedList_to_vectors(PyObject *py_vectors) {
     int i, n = PyObject_Length(py_vectors);
     struct vector *head = NULL, *curr = NULL, *new_vec = NULL;
@@ -90,6 +111,12 @@ static struct vector *linkedList_to_vectors(PyObject *py_vectors) {
     return head;
 }
 
+/**
+ * @brief Converts a 2D Python list into an array of C coordinate linked lists.
+ * * @param py_matrix Python list of lists.
+ * @param n Number of rows (sub-lists).
+ * @return struct cord** Array of linked lists, or NULL on error.
+ */
 static struct cord ** pylist_to_cords_matrix(PyObject *py_matrix, int n) {
     PyObject *py_cords_list = NULL;
     int i;
@@ -115,6 +142,12 @@ static struct cord ** pylist_to_cords_matrix(PyObject *py_matrix, int n) {
     return cords_matrix;
 }
 
+/**
+ * @brief Converts a C coordinate linked list into a 1D Python list of floats.
+ * * @param cords Head of the coordinate linked list.
+ * @param d Number of elements in the list.
+ * @return PyObject* Python list, or NULL on error.
+ */
 static PyObject *vectors_to_pylist(struct cord *cords, int d) {
     int i;
     PyObject *list = NULL, *py_float = NULL;
@@ -137,6 +170,13 @@ static PyObject *vectors_to_pylist(struct cord *cords, int d) {
     return list;
 }
 
+/**
+ * @brief Converts an array of C coordinate linked lists into a 2D Python list.
+ * * @param matrix Array of coordinate linked lists.
+ * @param n Number of rows.
+ * @param k Number of columns per row.
+ * @return PyObject* 2D Python list, or NULL on error.
+ */
 static PyObject *matrix_to_pylist(struct cord **matrix, int n, int k) {
     PyObject *item = NULL, *res = NULL;
     int i;
@@ -161,6 +201,12 @@ static PyObject *matrix_to_pylist(struct cord **matrix, int n, int k) {
     return res;
 }
 
+/**
+ * @brief Python API Wrapper: Executes the full SymNMF algorithm.
+ * * @param self The module object.
+ * @param args Tuple containing (H_matrix, W_matrix) from Python.
+ * @return PyObject* The updated H matrix as a 2D Python list.
+ */
 static PyObject *symnmf(PyObject *self, PyObject *args) {
     PyObject *py_Wmatrix = NULL, *py_Hmatrix = NULL, *res = NULL;
     int n, k;
@@ -196,6 +242,12 @@ static PyObject *symnmf(PyObject *self, PyObject *args) {
     return res;
 }
 
+/**
+ * @brief Python API Wrapper: Computes the Similarity Matrix.
+ * * @param self The module object.
+ * @param args Tuple containing (Data_Points) from Python.
+ * @return PyObject* The similarity matrix as a 2D Python list.
+ */
 static PyObject *sym(PyObject *self, PyObject *args) {
     PyObject *py_X_datapoints = NULL, *res = NULL;
     int n;
@@ -230,6 +282,12 @@ static PyObject *sym(PyObject *self, PyObject *args) {
     return res;
 }
 
+/**
+ * @brief Python API Wrapper: Computes the Diagonal Degree Matrix.
+ * * @param self The module object.
+ * @param args Tuple containing (Data_Points) from Python.
+ * @return PyObject* The diagonal degree matrix as a 2D Python list.
+ */
 static PyObject *ddg(PyObject *self, PyObject *args) {
     PyObject *py_X_datapoints = NULL, *res = NULL;
     int n;
@@ -264,6 +322,12 @@ static PyObject *ddg(PyObject *self, PyObject *args) {
     return res;
 }
 
+/**
+ * @brief Python API Wrapper: Computes the Normalized Similarity Matrix.
+ * * @param self The module object.
+ * @param args Tuple containing (Data_Points) from Python.
+ * @return PyObject* The normalized similarity matrix as a 2D Python list.
+ */
 static PyObject *norm(PyObject *self, PyObject *args) {
     PyObject *py_X_datapoints = NULL, *res = NULL;
     int n;
@@ -298,10 +362,9 @@ static PyObject *norm(PyObject *self, PyObject *args) {
     return res;
 }
 
-
-
-
-
+/**
+ * @brief Array defining the methods exposed to Python by this module.
+ */
 static PyMethodDef symnmfMethods[] = {
     {
         "symnmf",  
@@ -322,12 +385,15 @@ static PyMethodDef symnmfMethods[] = {
         "norm",  
         (PyCFunction)norm,           
         METH_VARARGS,
-        PyDoc_STR("Calculate and return the normalized similarity matrix as describedx")
+        PyDoc_STR("Calculate and return the normalized similarity matrix as described")
     },{
         NULL, NULL, 0, NULL
     }
 };
 
+/**
+ * @brief Module definition struct.
+ */
 static struct PyModuleDef symnmfmodule = {
     PyModuleDef_HEAD_INIT,
     "symnmfmodule", /* name of module */
@@ -340,6 +406,10 @@ static struct PyModuleDef symnmfmodule = {
     NULL
 };
 
+/**
+ * @brief Module initialization function, called by Python when importing the module.
+ * * @return PyMODINIT_FUNC The initialized module.
+ */
 PyMODINIT_FUNC PyInit_symnmfmodule(void) {
     PyObject *projectmodule;
     projectmodule = PyModule_Create(&symnmfmodule);

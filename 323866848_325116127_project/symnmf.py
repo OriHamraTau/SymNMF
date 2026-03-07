@@ -21,6 +21,15 @@ def main():
     required_matrix(data.tolist(), goal, k)
 
 def required_matrix(vectors, goal, k):
+    """
+    Routes the execution to the appropriate SymNMF C-extension function based on the goal.
+    Calculates the required matrix and prints it.
+
+    Args:
+        vectors (list): The input data points as a list of lists.
+        goal (str): The specific matrix to compute ('symnmf', 'sym', 'ddg', or 'norm').
+        k (int): The number of clusters (used only for the 'symnmf' goal).
+    """
     if goal == "symnmf":
         W = symnmfmodule.norm(vectors)
         H = user_input.H_inisettialization(W, k)
@@ -38,9 +47,14 @@ def required_matrix(vectors, goal, k):
     print_matrix(result_mat)
 
 def print_matrix(mat):
+    """
+    Prints a 2D matrix as comma-separated values, formatted to 4 decimal places.
+
+    Args:
+        mat (list of lists): The 2D matrix to print.
+    """
     for row in mat:
         print(",".join(["{:.4f}".format(val) for val in row]))
-
 
 if __name__ == "__main__":
     main()
