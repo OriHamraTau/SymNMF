@@ -2,13 +2,13 @@ import sys
 import math
 import copy
 
-EPSILON = 0.001
+EPSILON = 0.0001
 
 
 def initialize_centroids(k, vectors):
     return [copy.deepcopy(vectors[i]) for i in range(k)]
 
-def intialize_vectors_per_centroid(k):
+def initialize_vectors_per_centroid(k):
     return [[] for _ in range(k)]
 
 def get_centroid_id_per_vector(vector, centroids):

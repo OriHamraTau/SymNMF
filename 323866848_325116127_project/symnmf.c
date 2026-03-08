@@ -477,16 +477,7 @@ static double **H_cords_to_dense(struct cord **H, int n, int k) {
     return Hmatrix;
 }
 
-/**
- * @brief Executes the complete SymNMF algorithm pipeline.
- *
- * Converts input linked-list structures to dense matrices, allocates workspace memory,
- * runs the iterative optimization loop, and updates the original H structure 
- * in-place with the final computed values. Safely frees all allocated resources.
- *
- * @param H Array of coordinate linked lists representing the initial H matrix (updated in place).
- * @param W Linked list of vectors representing the normalized similarity matrix W.
- */
+/** Executes SymNMF algorithm: Wmatrix * Hmatrix iterations. Updates H in-place. */
 void symnmf_symnmf(struct cord **H, struct vector *W) {
     int w_rows, w_cols, n, i, k;
     double **Wmatrix, **Hmatrix, **WH, **HHt, **HHtH;
@@ -704,12 +695,7 @@ void symnmf_ddg(struct cord **out_rows, struct vector *data_rows) {
     free(diagonal);
 }
 
-/**
- * @brief Computes the Normalized Similarity Matrix (norm) W = D^(-1/2) * A * D^(-1/2).
- *
- * @param out_rows Pointer to the array where the resulting W matrix will be stored as linked lists.
- * @param data_rows Linked list of input vectors.
- */
+/** Computes normalized similarity matrix W = D^-1/2 * A * D^-1/2. */
 void symnmf_norm(struct cord **out_rows, struct vector *data_rows) {
     int n, d, i, j, dummy_r, dummy_c;
     double **X_dense, **A_dense, *D_diag;
@@ -890,14 +876,7 @@ static int grow_matrix(double ***M, int *cap) {
     return 0;
 }
 
-/**
- * @brief Parses a comma-separated string into an array of doubles.
- *
- * @param line_in The input CSV string.
- * @param out_row Pointer to store the allocated array of parsed doubles.
- * @param m The expected number of elements (columns).
- * @return int 0 on success, -1 on parsing or allocation failure.
- */
+/** Parses CSV string into double array. Returns 0 on success, -1 on error. */
 static int parse_txt_row(const char *line_in, double **out_row, int m) {
     char *tok, *endp, *line = my_strdup(line_in);
     int j;
@@ -931,15 +910,7 @@ static int parse_txt_row(const char *line_in, double **out_row, int m) {
     return 0;
 }
 
-/**
- * @brief Reads a CSV formatted text file into a dense 2D array of doubles.
- *
- * @param path The path to the text file.
- * @param out_M Pointer to store the resulting 2D matrix.
- * @param out_n Pointer to store the number of rows read.
- * @param out_k Pointer to store the number of columns read.
- * @return int 0 on success, -1 on file, parsing, or allocation errors.
- */
+/** Read CSV file into a dense 2D array. Returns 0 on success. */
 static int read_txt(const char *path, double ***out_M, int *out_n, int *out_k) {
     FILE *f;
     int cap, n, k, cols;
@@ -950,17 +921,15 @@ static int read_txt(const char *path, double ***out_M, int *out_n, int *out_k) {
 
     f = fopen(path, "r");
     if (f == NULL) return -1;
-
     M = malloc_size_t((size_t)cap, sizeof(*M));
     if (M == NULL) {
         fclose(f);
         return -1;
     }
-
     while ((line = readline_dynamic(f)) != NULL) {
         if (is_whitespace(line)) {
-             free(line); free_matrix(M, n); fclose(f); return -1; }
-        
+             free(line); free_matrix(M, n); fclose(f); return -1; 
+            }
         cols = columns_count(line);
         if (k < 0) {
             k = cols;
@@ -1044,35 +1013,34 @@ static void print_rows(struct cord **rows, int n, int k) {
  * @param goal The string identifier of the goal ("sym", "ddg", or "norm").
  * @param X_vecs The input data formatted as a linked list of vectors.
  * @param n The number of data points.
+ * @return  Return 0 on success, -1 on error.
  */
-static void execute_and_print(const char *goal, struct vector *X_vecs, int n) {
+static int execute_and_print(const char *goal, struct vector *X_vecs, int n) {
     int i;
     struct cord **rows;
     if (strcmp(goal, "symnmf") == 0) {
-        printf("An Error Has Occurred\n");
-        exit(1);
+        return -1;
     }
     rows = (struct cord **)calloc_size_t((size_t)n, sizeof(*rows));
     if (rows == NULL) {
-        printf("An Error Has Occurred\n");
-        exit(1);
+        return -1;
     }
     if (strcmp(goal, "sym") == 0) symnmf_sym(rows, X_vecs);
     else if (strcmp(goal, "ddg") == 0) symnmf_ddg(rows, X_vecs);
     else if (strcmp(goal, "norm") == 0) symnmf_norm(rows, X_vecs);
     else {
         free(rows);
-        printf("An Error Has Occurred\n");
-        exit(1); 
+        return -1;
     }
     print_rows(rows, n, n);
     for (i = 0; i < n; i++) free_cords(rows[i]);
     free(rows);
+    return 0;
 }
 
 int main(int argc, char **argv) {
     const char *goal, *path;
-    int n, d;
+    int n, d, status = 0;
     struct vector *X_vecs;
     double **X_dense;
 
@@ -1088,11 +1056,18 @@ int main(int argc, char **argv) {
 
     if (load_input(path, &X_vecs, &X_dense, &n, &d) != 0) {
         printf("An Error Has Occurred\n");
-        exit(1);
+        status = 1;
     }
-    execute_and_print(goal, X_vecs, n);
+    if(execute_and_print(goal, X_vecs, n) != 0) {
+        printf("An Error Has Occurred\n");
+        status = 1;
+    }
 
     free_vectors(X_vecs);
     if (X_dense != NULL) free_matrix(X_dense, n);
+
+    if (status == 1) {
+        exit(1);
+    }
     return 0;
 }

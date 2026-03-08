@@ -49,7 +49,7 @@ def kmeans_algo(k, vectors):
     """
     kmeans_labels = []
     initial_centroids = kmeans.initialize_centroids(k, vectors)
-    vectors_per_centroid = kmeans.intialize_vectors_per_centroid(k)
+    vectors_per_centroid = kmeans.initialize_vectors_per_centroid(k)
     final_centroids = kmeans.k_means(initial_centroids, vectors, MAX_ITER, vectors_per_centroid)
 
     for vec in vectors:
