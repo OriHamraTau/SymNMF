@@ -1040,7 +1040,7 @@ static int execute_and_print(const char *goal, struct vector *X_vecs, int n) {
 
 int main(int argc, char **argv) {
     const char *goal, *path;
-    int n, d, status = 0;
+    int n = 0, d, status = 0;
     struct vector *X_vecs;
     double **X_dense;
 
