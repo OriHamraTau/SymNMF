@@ -32,7 +32,7 @@ def required_matrix(vectors, goal, k):
     """
     if goal == "symnmf":
         W = symnmfmodule.norm(vectors)
-        H = user_input.H_inisettialization(W, k)
+        H = user_input.H_initialization(W, k)
         result_mat = symnmfmodule.symnmf(H, W)
     elif goal == "sym":
         result_mat = symnmfmodule.sym(vectors)
